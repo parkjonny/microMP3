@@ -117,7 +117,7 @@ void lcdInit(void)
 
 void lcdClear(void)
 {
-	lcdRegWrite(0x01);
+	lcdRegWrite(0x00);
 	lcdDelay(500);
 }
 
@@ -240,7 +240,7 @@ void lcdRegWrite(unsigned char reg)
 
 void lcdDelay(char d)
 {
-	volatile di;
+	volatile int di;
 	while(d--)
     	for(di=0; di<2; di++);
 }
