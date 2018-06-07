@@ -19,7 +19,10 @@ int c = 0;
 int d = 0;
 
 int keydata;
+
+float voltage;
 void port_init(void)
+
 { // void port_init() ??? ????
 	PORTA = 0X00;
 	DDRA = 0XFF;
@@ -34,7 +37,7 @@ void port_init(void)
 	PORTF = 0X00;
 	DDRF = 0X00;
 	PORTG = 0X00;
-	DDRG = 0X00;
+	DDRG = 0X03;
 	EX_SS_SEL = 0x0f;
 } // void port_init()
 
@@ -86,24 +89,20 @@ SIGNAL(TIMER1_OVF_vect)
 } // SIGNAL(SIG_OVERFLOW1)
 
 void time_pass()
+{	
+	int tempTime = digit_num;
+	a = tempTime / 6000;
+	tempTime -= a;
+	b = tempTime / 600;
+	tempTime -= b * 600;
+	c = tempTime / 100;
+	tempTime -= c * 100;
+	d = (tempTime % 100) / 10;
+}
+
+void moveTime(int voltage)
 {
-	if(digit_num % 10 == 0)
-		d++;
-	if(d==10)
-	{
-		c++;
-		d = 0;
-	}
-	if(c==6)
-	{
-		b++;
-		c = 0;
-	}
-	if(b==10)
-	{
-		a++;
-		b = 0;
-	}
+	digit_num = voltage;
 }
 
 void init_devices()
@@ -112,10 +111,6 @@ void init_devices()
 	port_init();
 	timer0_init();
 	timer1_init();
-	adc_init();
-	lcdInit();
-	lcdClear();
-	nosound();
 
 	MCUCR = 0X80;
 	TIMSK = 0X05;
@@ -134,15 +129,23 @@ void checkButton()
 	case 0x02:
 		pauseMusic();
 		break;
+
+	case 0x04:
+		moveTime(voltage);
+		break;
 	}
 }
- 
+
 int main()
 {	
 	unsigned int adc_data;
-	float voltage;
+
 
 	init_devices();
+	adc_init();
+	lcdInit();
+	lcdClear();
+	nosound();
 
 	while(1)
 	{
@@ -154,14 +157,11 @@ int main()
 		adc_startConversion();
 
 		adc_data = adc_readData();
-
-		voltage=(float)(5.*adc_data)/1024;
-		voltage = ((voltage * playTime) / 4995) * 1000;
-	
+		voltage = (adc_data * playTime) / 1023;
 		lcd_gotoxy(10,2);
-		lcd_putn3(voltage);
+		lcd_putn4(voltage);
 
-		for(int i = 0 ; i<1000;i++)
+		for(int i = 0 ; i<200;i++)
 			runDotMatrix();
 		
 	}
