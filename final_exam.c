@@ -150,7 +150,8 @@ int main()
 	while(1)
 	{
 		keydata = (PINB & 0xff);
-		checkButton();
+
+
 		schoolsong();
 		show_led(a, b, c, d);
 
@@ -158,6 +159,10 @@ int main()
 
 		adc_data = adc_readData();
 		voltage = (adc_data * playTime) / 1023;
+
+		checkButton();
+
+
 		lcd_gotoxy(10,2);
 		lcd_putn4(voltage);
 
